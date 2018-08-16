@@ -1,4 +1,6 @@
-package com.example.jongsubaek.baekdata_app;
+package com.example.jongsubaek.baekdata_app.network;
+
+import com.example.jongsubaek.baekdata_app.data.AirPollution;
 
 public class ResponseBody {
     private String status;

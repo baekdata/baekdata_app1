@@ -6,17 +6,16 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.gson.JsonObject;
-
-import java.util.ArrayList;
+import com.example.jongsubaek.baekdata_app.data.GeoVariable;
+import com.example.jongsubaek.baekdata_app.network.ApiService;
+import com.example.jongsubaek.baekdata_app.network.ResponseBody;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -31,11 +30,9 @@ public class MainActivity extends AppCompatActivity {
     Call<ResponseBody> comment;
 
     TextView tv; // ui
-
     GeoVariable geoVariable = new GeoVariable(); // 위도 경도 가져오
 
-
-    void callRetrofit(double n, double m){
+    public void callRetrofit(double n, double m){
         comment = apiService.getListRepos(n, m, 500, ApiService.APPKEY);
         comment.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -44,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
                     ResponseBody responseBody = response.body();
 
                     if(responseBody != null){
-                        tv.setText(responseBody.getData().getCity()+" "+geoVariable.getLongitube());
+                        String state = checkPollution(Integer.parseInt(responseBody.getData().getCurrent().getPollution().getAqius()));
+                        tv.setText(responseBody.getData().getCity()+" "+geoVariable.getLongitube()+" "+state);
                     }
                 }catch(Exception e){
 
@@ -56,6 +54,22 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    // 미세먼지 값 체크
+    public String checkPollution(int pollution){
+        String text = "";
+
+        if(pollution <= 30){
+            text = "좋음";
+        }else if(30< pollution && pollution <= 80){
+            text = "보통";
+        }else if(80< pollution && pollution <=150){
+            text = "나쁨";
+        }else{
+            text = "매우나쁨";
+        }
+        return text;
     }
 
     @Override
@@ -98,31 +112,40 @@ public class MainActivity extends AppCompatActivity {
         retrofit = new Retrofit.Builder().baseUrl(ApiService.BASEURL).addConverterFactory(GsonConverterFactory.create()).build();
         apiService = retrofit.create(ApiService.class);
 
-        Log.d("test", "onLocationChanged, location:" + geoVariable.getLatitude());
+        /*
+        부산 (+16 km) ; 위도 33.348885 경도 126.280975
+제주도 제주 (+16 km), 위도 33.431441 경도 126.874237
+강원도 속초 (+16 km), 위도 37.348326 경도 127.928925
+서울 (+16 km), 위도 37.487935 경도 126.857758
+인천 (+16 km) 인천광역시; 위도 37.437793 경도 126.975861
+경기도 하남 (+16 km), 위도 37.269682 경도 127.033539
+경기도 수원 (+16 km), 위도 37.245635 경도 127.179108
+경기도 용인 (+16 km), 위도 37.68382 경도 126.742401
+고양시 (+16 km), 위도 37.424707 경도 127.126923
+         */
 
+        // retrofit 호출
+        comment = apiService.getListRepos(36.3753836, 127.3613915, 500, ApiService.APPKEY);
+        comment.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try{
+                    ResponseBody responseBody = response.body();
 
-//        comment = apiService.getListRepos(36.3753836, 127.3613915, 500, ApiService.APPKEY);
-//        comment.enqueue(new Callback<ResponseBody>() {
-//            @Override
-//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                try{
-//                    ResponseBody responseBody = response.body();
-//
-//                    if(responseBody != null){
-//                        tv.setText(responseBody.getData().getCity()+" "+geoVariable.getLongitube());
-//                    }
-//                }catch(Exception e){
-//
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ResponseBody> call, Throwable t) {
-//
-//            }
-//        });
+                    if(responseBody != null){
+                        String state = checkPollution(Integer.parseInt(responseBody.getData().getCurrent().getPollution().getAqius()));
+                        tv.setText(responseBody.getData().getCity()+" "+geoVariable.getLongitube()+" "+state);
+                    }
+                }catch(Exception e){
 
+                }
+            }
 
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
     }
 
     private final LocationListener mLocationListener = new LocationListener() {
@@ -136,7 +159,8 @@ public class MainActivity extends AppCompatActivity {
             geoVariable.setLatitude(latitude); // 클래스 변수에 위도 대입
             geoVariable.setLongitube(longitude);  // 클래스 변수에 경도 대입
 
-            callRetrofit(latitude, longitude);
+            //TODO 현재 위치 값 호출.
+//            callRetrofit(latitude, longitude);
         }
 
         public void onProviderDisabled(String provider) {
@@ -154,5 +178,4 @@ public class MainActivity extends AppCompatActivity {
             Log.d("test", "onStatusChanged, provider:" + provider + ", status:" + status + " ,Bundle:" + extras);
         }
     };
-
 }

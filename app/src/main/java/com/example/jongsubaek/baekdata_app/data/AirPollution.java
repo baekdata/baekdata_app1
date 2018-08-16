@@ -1,9 +1,19 @@
-package com.example.jongsubaek.baekdata_app;
+package com.example.jongsubaek.baekdata_app.data;
 
 public class AirPollution {
     private String city;
     private String state;
-    private String Country;
+    private String country;
+
+    private Current current;
+
+    public Current getCurrent() {
+        return current;
+    }
+
+    public void setCurrent(Current current) {
+        this.current = current;
+    }
 
     public String getCity() {
         return city;
@@ -22,10 +32,10 @@ public class AirPollution {
     }
 
     public String getCountry() {
-        return Country;
+        return country;
     }
 
     public void setCountry(String country) {
-        Country = country;
+        this.country = country;
     }
 }

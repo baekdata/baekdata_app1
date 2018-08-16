@@ -1,4 +1,4 @@
-package com.example.jongsubaek.baekdata_app;
+package com.example.jongsubaek.baekdata_app.network;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

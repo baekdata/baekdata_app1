@@ -1,4 +1,4 @@
-package com.example.jongsubaek.baekdata_app;
+package com.example.jongsubaek.baekdata_app.data;
 
 /**
  * 모든 서버 응답 부모 클래스
